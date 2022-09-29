@@ -1,0 +1,23 @@
+[package]
+name = "floating_state"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+
+[dependencies]
+near-sdk = "4.0.0"
+
+[dev-dependencies]
+anyhow = "1.0"
+tokio = { version = "1", features = ["full"] }
+# Feature `unstable` is required for compiling contracts during tests.
+workspaces = { version = "0.5", features = ["unstable"] }
