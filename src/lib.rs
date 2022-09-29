@@ -33,15 +33,17 @@ impl CounterStatusMessage {
     pub fn add_message(&mut self, message: String) -> Option<String> {
         let account_id = env::predecessor_account_id();
         let mut messages = self.messages();
-        messages.as_mut().insert(&account_id, &message)
+        messages.insert(&account_id, &message)
     }
 
     pub fn get_message(&self, account_id: AccountId) -> Option<String> {
-        self.messages().as_ref().get(&account_id)
+        self.messages().get(&account_id)
     }
 }
 
 mod floating_state {
+    use std::ops::{Deref, DerefMut};
+
     use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
     use near_sdk::env;
     use near_sdk::IntoStorageKey;
@@ -93,6 +95,18 @@ mod floating_state {
         }
     }
 
+    impl<T, K> Deref for State<T, K>
+    where
+        T: BorshDeserialize + BorshSerialize,
+        K: IntoStorageKey + Clone,
+    {
+        type Target = T;
+
+        fn deref(&self) -> &Self::Target {
+            self.as_ref()
+        }
+    }
+
     impl<T, K> AsMut<T> for State<T, K>
     where
         T: BorshDeserialize + BorshSerialize,
@@ -101,6 +115,16 @@ mod floating_state {
         fn as_mut(&mut self) -> &mut T {
             self.mutated = true;
             &mut self.data
+        }
+    }
+
+    impl<T, K> DerefMut for State<T, K>
+    where
+        T: BorshDeserialize + BorshSerialize,
+        K: IntoStorageKey + Clone,
+    {
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            self.as_mut()
         }
     }
 
